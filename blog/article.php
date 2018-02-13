@@ -1,4 +1,28 @@
-<?php require_once '_db.php'; ?>
+<?php
+
+require_once 'tools/_db.php';
+
+if(isset($_GET['article_id'] ) ){
+
+	//selection de l'article dont l'ID est envoyé en paramètre GET
+	$query = $db->prepare('SELECT * FROM article WHERE id = ? AND is_published = 1');
+	$query->execute( array( $_GET['article_id'] ) );
+
+	$article = $query->fetch();
+
+	//si pas d'article trouvé dans la base de données, renvoyer l'utilisateur vers la page index
+	if(!$article){
+		header('location:index.php');
+		exit;
+	}
+
+}
+else{ //si article_id n'est pas envoyé en URL, renvoyer l'utilisateur vers la page index
+	header('location:index.php');
+	exit;
+}
+
+?>
 
 <!DOCTYPE html>
 <html>
@@ -18,24 +42,26 @@
 
 			<?php require 'partials/nav.php'; ?>
 
-
 			<main class="col-9">
 				<article>
-            <!-- contenu de l'article -->
-
-<?php $query = $db->prepare('SELECT * FROM article WHERE id = ?'); ?>
-<?php $query->execute( array( $_GET['id'] ) ); ?>
+					<h1><?php echo $article['title']; ?></h1>
 
 
+          <?php
+             $categoryQuery = $db->query('
+						 SELECT article.* , category.name AS article
+						 FROM article
+						 JOIN category
+						 ON article.category_id = category.id');
+				  ?>
 
-<?php while ( $data = $query->fetch()) : ?>
-  <ul>
-    <h2><?php echo $data['title'];?></h2>
-    <div class="data"><?php echo $data['created_at'];?></div>
-    <div class="content"><?php echo $data ['content']; ?></div>
- <ul>
-
-<?php endwhile; ?>
+						<?php $articleCategoryName = $categoryQuery->fetchColumn();
+?>
+					<b class="article-category">[<?php echo $articleCategoryName; ?>]</b>
+					<span class="article-date">Créé le <?php echo $article['created_at']; ?></span>
+					<div class="article-content">
+						<?php echo $article['content']; ?>
+					</div>
 				</article>
 			</main>
 
