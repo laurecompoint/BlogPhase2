@@ -164,7 +164,15 @@ if(isset($_GET['article_id']) && isset($_GET['action']) && $_GET['action'] == 'e
 
 	$articleCategories = $query->fetchAll();
 
+
+
 	//ici aller chercher les images liées à l'articles pour les lister dans l'onglet des images
+	$query = $db->prepare('SELECT * FROM image WHERE article_id');
+	$query->execute(array($_GET['article_id']));
+
+	$image = $query->fetchAll();
+
+
 
 }
 
@@ -381,23 +389,19 @@ if(isset($_GET['delete_image'])){
 
 								<h5>Liste des images :</h5>
 
-								<?php $query = $db->query('SELECT * FROM image');
-								?>
+<?php if(!empty($image)) : ?>
 
-
-
-									<?php foreach ($query as $key => $value) :?>
+									<?php foreach ($image as $key => $value) : ?>
 										 <img src="../img/article/<?php echo $value['name'];?>" alt="photos list"/>
 
-								<?php endforeach;
-                  ?>
+								<?php endforeach;?>
 
 
+<?php endif; ?>
 
-  <?php $query->closeCursor();?>
 
 	<td>
-		<a href="article-form.php?article_id=<?php echo $article['id']; ?>&action=edit" class="btn btn-warning">Modifier</a>
+
 		<a name="delete_image" onclick="return confirm('Are you sure?')" href="article-list.php?image_id=<?php echo $article['id']; ?>&action=delete_image" class="btn btn-danger">Supprimer</a>
 	</td>
 
